@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
+
 
 void main() {
   runApp(const MyApp());
@@ -13,7 +15,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: Text('SafeArea Example'),
+          title: Text('Done Button Example'),
         ),
         body: MySafeAreaBody(),
       ),
@@ -26,76 +28,71 @@ class MySafeAreaBody extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Center(
-        child: MyHomePage(),
+        child: MyCustomTextField(),
       ),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
+class MyCustomTextField extends StatefulWidget {
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _MyCustomTextFieldState createState() => _MyCustomTextFieldState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  final _textController = TextEditingController();
-  final _focusNode = FocusNode();
-  // Inside your _MyHomePageState class
-  FocusScopeNode _scopeNode = FocusScopeNode();
-  bool _showAccessory = false;
+class _MyCustomTextFieldState extends State<MyCustomTextField> {
+  FocusNode _focusNode = FocusNode();
+  bool _isKeyboardVisible = false;
 
   @override
   void initState() {
     super.initState();
-    _focusNode.addListener(() {
-      setState(() {
-        _showAccessory = _focusNode.hasFocus;
-      });
+    _focusNode.addListener(_onFocusChange);
+    var keyboardVisibilityController = KeyboardVisibilityController();
+    // Subscribe to keyboard visibility changes
+    keyboardVisibilityController.onChange.listen((bool visible) {
+      setState(() => _isKeyboardVisible = visible);
     });
   }
 
-  Widget _buildKeyboardAccessory() {
-    return Container(
-      height: 40,
-      color: Colors.grey[200],
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          TextButton(
-            onPressed: () {
-              // Your 'Done' button action here
-              _textController.clear(); // Example: Clear textfield
-              FocusScope.of(context).unfocus(); // Dismiss keyboard
-            },
-            child: Text('Done'),
-          ),
-        ],
+  void _onFocusChange() {
+    if (!_focusNode.hasFocus) {
+      // Optionally reset your widget's state here
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: <Widget>[
+        TextField(
+          focusNode: _focusNode,
+          decoration: InputDecoration(hintText: 'Tap here...'),
+        ),
+        Positioned(
+          bottom: _isKeyboardVisible ? MediaQuery.of(context).viewInsets.bottom : 0,
+          right: 0,
+          child: _isKeyboardVisible ? _buildDoneButton() : Container(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDoneButton() {
+    return Padding(
+      padding: const EdgeInsets.all(2.0),
+      child: ElevatedButton(
+        child: Text('Done'),
+        onPressed: () {
+          _focusNode.unfocus();
+        },
       ),
     );
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      // ... (Rest of your Scaffold)
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: FocusScope(
-          node: _scopeNode,
-          child: Column(
-            children: [
-              TextField(
-                controller: _textController,
-                focusNode: _focusNode,
-                decoration: InputDecoration(hintText: 'Enter some text'),
-              ),
-              if (_showAccessory) _buildKeyboardAccessory(),
-            ],
-          ),
-        ),
-      ),
-    );
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
   }
-
-  // ... _buildKeyboardAccessory() remains the same
 }
+
