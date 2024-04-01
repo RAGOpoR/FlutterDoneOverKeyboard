@@ -1,4 +1,5 @@
 # done_button_keyboard
+<img width="583" alt="Screenshot 2567-04-02 at 06 41 47" src="https://github.com/RAGOpoR/FlutterDoneOverKeyboard/assets/875062/be409559-0fb8-4291-ac4e-e36f2298aadf">
 
 Rendering a "Done" button as an `inputAccessoryView` in Flutter typically involves creating a custom toolbar widget that appears above the keyboard when an input field is focused. In iOS development, `inputAccessoryView` is a property used to attach a custom accessory view, such as a toolbar with buttons, to the top of the keyboard. Flutter doesn't directly use the `inputAccessoryView` concept because it aims to provide a unified way to create UIs that work across platforms. However, you can achieve a similar result by using the `TextField` widget along with a toolbar that shows when the keyboard is active.
 
